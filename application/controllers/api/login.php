@@ -17,17 +17,18 @@ class Login extends REST_Controller
     {
 
         // 判断是否已输入账号密码
-        if (empty($_GET['account']) || empty($_GET['password']))
+        if (empty($_GET['account']) || empty($_GET['password']) || empty($_GET['appkey']))
         {
             $this -> response(array(
                 'result' => Result::ACCOUNTORPWD_EMPTY,
-                'msg'    => "账号密码不能为空！"
+                'msg'    => "empty request param ！"
             ));
         }
 
         // 取出字段
         $account  = $this -> input -> get('account',TRUE);
         $password = $this -> input -> get('password',TRUE);
+        $appkey   = $this -> input -> get('appkey',TRUE);
 
         // 查询数据库
         /*
@@ -67,50 +68,63 @@ class Login extends REST_Controller
 
 
         // 方法二：
-        $sql = "SELECT * FROM user WHERE account = ? AND  password = ?";  // 获取指定条件下的表数据
+        $sql = "SELECT * FROM user WHERE account = ? AND  password = ? AND appkey = ?";  // 获取指定条件下的表数据
         // 查询绑定【查询语句中的"？"将会被第二参数位置的数组相应值替代】
-        $query = $this -> db -> query($sql,array($account,$password));
+        $query = $this -> db -> query($sql,array($account,$password,$appkey));
         /*
          * 注意：当在查询数据库时，以上两个条件中任意为假，得到的结果集都为空，不会进入foreach循环中
          */
         foreach ($query -> result_array() as $row) {
 
         }
-        $data = array();
-        if ($row['account'] == $account && $row['password'] == $password)
+
+        if ($appkey == $row['appkey'])
         {
-            // 封装自定义返回数据
-//                $data = array(
-//                    'account' => $row['account'],
-//                    'password'=> $row['password'],
-//                    'birthday'=> $row['birthday'],
-//                    'sex'     => $row['sex'],
-//                    'icon'    => $row['icon'],
-//                    'address' => $row['address']
-//                );
-            $data = $row;
-            $this -> response(array(
-                'result' => Result::SUCCESS,
-                'msg'    => "登陆成功！",
-                'data'   => $data
-            ));
-        }
-        elseif ($row['account'] != $account || $row['password'] != $password)
-        {
-            $this -> response(array(
-                'result' => Result::ACCOUNTORPWD_FAIL,
-                'msg'    => "账号或密码错误！",
-                'data'   => $data
-            ));
+            $data = array();
+            if ($row['account'] == $account && $row['password'] == $password)
+            {
+                // 封装自定义返回数据
+                $data = array(
+                    'account' => $row['account'],
+                    'password'=> $row['password'],
+                    'birthday'=> $row['birthday'],
+                    'sex'     => $row['sex'],
+                    'icon'    => $row['icon'],
+                    'address' => $row['address']
+                );
+                $data = $row;
+                $this -> response(array(
+                    'result' => Result::SUCCESS,
+                    'msg'    => "登陆成功！",
+                    'data'   => $data
+                ));
+            }
+            elseif ($row['account'] != $account || $row['password'] != $password)
+            {
+                $this -> response(array(
+                    'result' => Result::ACCOUNTORPWD_FAIL,
+                    'msg'    => "账号或密码错误！",
+                    'data'   => $data
+                ));
+            }
+            else
+            {
+                $this -> response(array(
+                    'result' => Result::FAIL,
+                    'msg'    => "登陆失败！",
+                    'data'   => $data
+                ));
+            }
         }
         else
         {
-            $this -> response(array(
+            $this->response(array(
                 'result' => Result::FAIL,
-                'msg'    => "登陆失败！",
-                'data'   => $data
+                'msg'    => 'appkey param error !',
+                'data'   => array()
             ));
         }
+
 
     }
 }

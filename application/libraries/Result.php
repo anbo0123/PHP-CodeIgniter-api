@@ -13,4 +13,6 @@ class Result{
     const ACCOUNTORPWD_EMPTY = 1000;  // 账号或密码为空
     const ACCOUNTORPWD_FAIL  = 1001;  // 账号或密码错误
     const ACCOUNT_EXIST      = 1002;  // 用户已存在
+    const REQUESTPARAM_EMPTY = 1003;  // 请求参数为空
+    const REQUESTPARAM_FAIL  = 1004;  // 请求参数错误
 }

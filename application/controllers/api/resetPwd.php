@@ -12,28 +12,29 @@ class resetPwd extends REST_Controller
 {
     public function index_get()
     {
-        if (empty($_GET['account'] || $_GET['password']))
+        if (empty($_GET['appkey'])|| empty($_GET['account']))
         {
             $this->response(array(
                 'result' => Result::ACCOUNTORPWD_EMPTY,
-                'msg'    => "账号密码不能为空！"
+                'msg'    => "empty request param ！"
             ));
         }
 
         // 取出字段
         $account  = $this->input->get('account',TRUE);
         $password = $this->input->get('password',TRUE);
+        $appkey   = $this->input->get('appkey',TRUE);
 
         // 查询数据库
-        $sql = "SELECT * FROM user WHERE account = '$account'";
-        $query = $this->db->query($sql);
-        foreach ($query->result() as $row)
+        $sql = "SELECT * FROM user WHERE account = ? AND appkey = ?";
+        $query = $this->db->query($sql,array($account,$appkey));
+        foreach ($query->result_array() as $row)
         {
             // 获取该账号在数据库的主键值
-            $id = $row->id;
+            $id = $row['id'];
         }
 
-        if ($query->row_array())
+        if ($appkey == $row['appkey'] && $account == $row['account'])
         {
             /*
              *  重置数据库中主键和账号对应的密码
